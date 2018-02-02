@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 
-//
 
 public class GameManager : Singleton<GameManager> {
 
@@ -20,6 +20,8 @@ public class GameManager : Singleton<GameManager> {
 
     private int[] waveCounts = { 20, 30, 42, 50, 60, 70 };
     private int[] burstSizes = { 5, 6, 7, 10, 12, 14 };
+
+    private int survivalWaveSize = 5;
 
     // list of enemies on screen
     private List<GameObject> activeEnemies = new List<GameObject>();
@@ -44,6 +46,7 @@ public class GameManager : Singleton<GameManager> {
     private bool playerIsDead;
     private bool playerHasWon;
     private bool gameOver { get { return playerIsDead || playerHasWon; } }
+    private bool isSurvivalMode;
     
     public bool PlayerIsDead { get { return playerIsDead; } }
 
@@ -51,7 +54,7 @@ public class GameManager : Singleton<GameManager> {
     {
         get { return gameOver; }
     }
-
+    
     void Awake()
     {
         Assert.IsNotNull(fireLocation);
@@ -65,6 +68,8 @@ public class GameManager : Singleton<GameManager> {
 
 	// Use this for initialization
 	void Start () {
+        // stops the game from playing at start
+        playerIsDead = true;
         currentWave = 1;
         PlayGame();
     }
@@ -74,26 +79,8 @@ public class GameManager : Singleton<GameManager> {
 
         if (!gameOver)
         {
-            if(enemiesKilled >= waveCounts[waveIndex])
-            {
-                currentWave++;
-                burstSize = burstSizes[waveIndex];
-                if(currentWave > waveCounts.Length)
-                {
-                    // The game is over, the player has won
-                    playerHasWon = true;
-                    messageText.gameObject.SetActive(true);
-                    messageText.fontSize = ywfs;
-                    messageText.text = "You Win!";
-                    messageText.GetComponent<Animator>().SetTrigger("GameOver");
-                    endGame();
-                } else {
-                    // continue game with the next wave
-                    initializeNewWave();                
-                }
-            }
-
-            timeSinceLastSpawn += Time.deltaTime;
+            if(!isSurvivalMode)
+                classicModeUpdateCheck();
         } else
         {
             // some sort of menu system
@@ -101,8 +88,36 @@ public class GameManager : Singleton<GameManager> {
 
     }
 
+    private void classicModeUpdateCheck()
+    {
+        if (enemiesKilled >= waveCounts[waveIndex])
+        {
+            currentWave++;
+            burstSize = burstSizes[waveIndex];
+            if (currentWave > waveCounts.Length)
+            {
+                // The game is over, the player has won
+                playerHasWon = true;
+                messageText.gameObject.SetActive(true);
+                messageText.fontSize = ywfs;
+                messageText.text = "You Win!";
+                messageText.GetComponent<Animator>().SetTrigger("GameOver");
+                endGame();
+            }
+            else
+            {
+                // continue game with the next wave
+                initializeNewWave();
+            }
+        }
+
+        timeSinceLastSpawn += Time.deltaTime;
+    }
+
     public void PlayGame()
     {
+        isSurvivalMode = Menu.IsSurvivalMode;
+        currentWave = 1;
         clearEnemies();
         enemiesSpawned = 0;
         enemiesKilled = 0;
@@ -121,14 +136,14 @@ public class GameManager : Singleton<GameManager> {
         yield return new WaitForSeconds(1f);
         messageText.gameObject.SetActive(true);
         messageText.fontSize = cdfs;
-        messageText.text = "Sending Wave in 3";
+        messageText.text = "Sending Enemies in 3";
         yield return new WaitForSeconds(1f);
-        messageText.text = "Sending Wave in 2";
+        messageText.text = "Sending Enemies in 2";
         yield return new WaitForSeconds(1f);
-        messageText.text = "Sending Wave in 1";
+        messageText.text = "Sending Enemies in 1";
         yield return new WaitForSeconds(1f);
         messageText.gameObject.SetActive(false);
-        StartCoroutine(SpawnLoop());
+        startSpawnLoop();
     }
 
     // reset vars then call waitForNextWave
@@ -151,7 +166,7 @@ public class GameManager : Singleton<GameManager> {
         messageText.text = "Sending next wave...";
         yield return new WaitForSeconds(2.5f);
         UpdateScore();
-        StartCoroutine(SpawnLoop());
+        StartCoroutine(ClassicSpawnLoop());
         messageText.gameObject.SetActive(false);
     }
 
@@ -169,7 +184,15 @@ public class GameManager : Singleton<GameManager> {
         enemiesSpawned++;
     }
 
-    IEnumerator SpawnLoop()
+    private void startSpawnLoop()
+    {
+        if (isSurvivalMode)
+            StartCoroutine(SurvivalSpawnLoop());
+        else
+            StartCoroutine(ClassicSpawnLoop());
+    }
+
+    IEnumerator ClassicSpawnLoop()
     {
         if (enemiesSpawned < waveCounts[waveIndex] && !gameOver)
         {
@@ -186,11 +209,31 @@ public class GameManager : Singleton<GameManager> {
                 {
                     yield return new WaitForSeconds(timeBetweenSpawns);
                 }
-                StartCoroutine(SpawnLoop());
+                StartCoroutine(ClassicSpawnLoop());
             }
             // Increase speed after wave
             else { Enemy.WalkSpeed += .3f; }
         } 
+    }
+
+    IEnumerator SurvivalSpawnLoop()
+    {
+        if (!gameOver)
+        {
+            spawnEnemy();
+            if(enemiesSpawned % survivalWaveSize == 0)
+            {
+                yield return new WaitForSeconds(timeBetweenBursts);
+                Enemy.WalkSpeed += .3f;
+                survivalWaveSize++;
+                enemiesSpawned = 0;
+            }
+            else
+            {
+                yield return new WaitForSeconds(timeBetweenSpawns/1.2f);
+            }
+            StartCoroutine(SurvivalSpawnLoop());
+        }
     }
 
     // delete all enemies from map
@@ -244,33 +287,41 @@ public class GameManager : Singleton<GameManager> {
     private void endGame()
     {
         finalKillsText();
-        showHighScoreText(totalEnemiesKilled > PlayerPrefs.GetInt("HighScore", 0));
+        showHighScoreText();
         StartCoroutine(CountdownToRestart());
     }
 
-    private void showHighScoreText(bool isHighScore)
+    private void showHighScoreText()
     {
         highScoreText.gameObject.SetActive(true);
-        if (isHighScore)
+        if (isSurvivalMode)
         {
-            highScoreText.text = "New High Score!";
-            PlayerPrefs.SetInt("HighScore", totalEnemiesKilled);
+            if(totalEnemiesKilled > PlayerPrefs.GetInt("SurvivalHighScore", 0))
+            {
+                highScoreText.text = "New High Score!";
+                PlayerPrefs.SetInt("SurvivalHighScore", totalEnemiesKilled);
+            } else
+            {
+                highScoreText.text = "High Score: " + PlayerPrefs.GetInt("SurvivalHighScore", 0);
+            }
         } else
         {
-            highScoreText.text = "High Score: " + PlayerPrefs.GetInt("HighScore", 0);
+            if (totalEnemiesKilled > PlayerPrefs.GetInt("HighScore", 0))
+            {
+                highScoreText.text = "New High Score!";
+                PlayerPrefs.SetInt("HighScore", totalEnemiesKilled);
+            }
+            else
+            {
+                highScoreText.text = "High Score: " + PlayerPrefs.GetInt("HighScore", 0);
+            }
         }
     }
 
     IEnumerator CountdownToRestart()
     {
         yield return new WaitForSeconds(5f);
-        messageText.fontSize = cdfs;
-        for(int seconds = 30; seconds > 0; seconds--)
-        {
-            messageText.text = "Restarting Game in " + seconds;
-            yield return new WaitForSeconds(1f);
-        }
-        PlayGame();
+        SceneManager.LoadSceneAsync("MainMenu");
     }
 
 }
