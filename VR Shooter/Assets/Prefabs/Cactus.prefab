@@ -170,10 +170,16 @@ GameObject:
   m_Component:
   - component: {fileID: 4949134004533608}
   - component: {fileID: 95628549186019880}
-  - component: {fileID: 114010050804569206}
   - component: {fileID: 54061257719399372}
   - component: {fileID: 136576099528432326}
   - component: {fileID: 82276687205409976}
+  - component: {fileID: 114115264974812866}
+  - component: {fileID: 114100394034575694}
+  - component: {fileID: 114554816658320550}
+  - component: {fileID: 114236487084986058}
+  - component: {fileID: 114521231661540060}
+  - component: {fileID: 114483469483529362}
+  - component: {fileID: 114888870985422494}
   m_Layer: 0
   m_Name: Cactus
   m_TagString: Enemy
@@ -192,7 +198,7 @@ GameObject:
   - component: {fileID: 135174406475332840}
   m_Layer: 0
   m_Name: CATRigLArmDigit21
-  m_TagString: EnemyAttack
+  m_TagString: EnemyWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -301,7 +307,7 @@ GameObject:
   - component: {fileID: 135674437029435362}
   m_Layer: 0
   m_Name: CATRigRArmDigit21
-  m_TagString: EnemyAttack
+  m_TagString: EnemyWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -770,8 +776,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1354784863184490}
-  m_LocalRotation: {x: 0, y: 0.8201518, z: 0, w: 0.572146}
-  m_LocalPosition: {x: 247.8, y: 0, z: 253}
+  m_LocalRotation: {x: -0, y: 0.1500971, z: -0, w: 0.9886713}
+  m_LocalPosition: {x: -2.9118955, y: 0, z: -6.8956347}
   m_LocalScale: {x: 0.07, y: 0.07, z: 0.07}
   m_Children:
   - {fileID: 4855726122420274}
@@ -779,7 +785,7 @@ Transform:
   - {fileID: 4987648688874766}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 110.2, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 17.265001, z: 0}
 --- !u!4 &4987648688874766
 Transform:
   m_ObjectHideFlags: 1
@@ -1001,7 +1007,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &114010050804569206
+--- !u!114 &114100394034575694
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -1009,14 +1015,144 @@ MonoBehaviour:
   m_GameObject: {fileID: 1354784863184490}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f68c5354c70c2947a3642216dfdd5f0, type: 3}
+  m_Script: {fileID: 11500000, guid: 68dff1a3a6250c8439213163a6ee223e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerLocation: {fileID: 4889008511184638, guid: 6d344d034cc2c2143bc34290a981182b,
-    type: 2}
-  stoppingDistance: 2.85
+  OnEnemyKill:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 114554816658320550}
+        m_MethodName: KnockEnemyBack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 114521231661540060}
+        m_MethodName: RemoveCollider
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 114236487084986058}
+        m_MethodName: TakeHit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 114115264974812866}
+        m_MethodName: Die
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: KillEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+--- !u!114 &114115264974812866
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d76b4eb4675b2e4b85566724fdf6c9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnReachedTarget:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 114483469483529362}
+        m_MethodName: Attack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: ReachedTargetEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  stoppingDistance: 3.5
   recoilDistance: 5
-  recoilSpeed: 1
+--- !u!114 &114236487084986058
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8ab5877edc9e640a9bf9219a2fab85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114483469483529362
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d76504655bc989c44a4f7cde430a168b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114521231661540060
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 131e6285ee353da4bbf1fa4ac9ba2883, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114554816658320550
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01b80b7f13fa9cf4eb961a106f2d9937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recoilDistance: 5
+  timeOfRecoil: 25
+  recoilSpeed: 1.07
+--- !u!114 &114888870985422494
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1354784863184490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e6cc38966b613a45b7ca9478edacf39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   rightHand: {fileID: 135674437029435362}
   leftHand: {fileID: 135174406475332840}
 --- !u!135 &135174406475332840
